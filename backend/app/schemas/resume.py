@@ -6,6 +6,12 @@ class ResumeCreate(BaseModel):
     content: str
 
 
+class ResumeImprove(BaseModel):
+    content: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ResumeUpdate(BaseModel):
     title: str | None = None
     content: str | None = None

@@ -4,7 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user, swagger_auth
-from app.schemas.resume import ResumeResponse, ResumeCreate, ResumeUpdate
+from app.schemas.resume import (
+    ResumeResponse, ResumeCreate, ResumeUpdate,
+    ResumeImprove,
+)
 from app.schemas.user import UserResponse
 from app.services.resume_service import ResumeService
 
@@ -60,3 +63,14 @@ async def update_resume(
 async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
     await ResumeService.delete_resume(resume_id, db)
     return
+
+
+@router.post(
+    "{resume_id}/improve", response_model=ResumeImprove, status_code=200,
+    dependencies=[Depends(swagger_auth), Depends(get_current_user)]
+)
+async def improve_resume(
+    resume_id: int, resume_in: ResumeImprove,
+    db: AsyncSession = Depends(get_db)
+):
+    return await ResumeService.improve_resume(resume_id, resume_in, db)
