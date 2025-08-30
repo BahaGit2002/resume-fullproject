@@ -16,7 +16,7 @@ class AuthService:
             raise HTTPException(status_code=400, detail="User already exists")
 
         user = await user_repo.create(user_in)
-        token = create_jwt({"sub": str(user.id)})
+        token = create_jwt({"sub": str(user.email)})
         return TokenWithUser(
             user=UserResponse.model_validate(user),
             access_token=token,
@@ -31,7 +31,7 @@ class AuthService:
         if not user or not verify_password(user_in.password, str(user.hashed_password)):
             raise HTTPException(status_code=400, detail="Invalid credentials")
 
-        token = create_jwt({"sub": str(user.id)})
+        token = create_jwt({"sub": str(user.email)})
         return TokenWithUser(
             user=UserResponse.model_validate(user),
             access_token=token,

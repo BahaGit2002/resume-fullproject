@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -15,8 +16,13 @@ class Resume(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    user = relationship("User", back_populates="resumes")
-    history = relationship("ResumeHistory", back_populates="resume")
+    user: Mapped["User"] = relationship("User", back_populates="resumes")
+    histories: Mapped[List["ResumeHistory"]] = relationship(
+        "ResumeHistory",
+        back_populates="resume",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
 
 class ResumeHistory(Base):
@@ -31,4 +37,4 @@ class ResumeHistory(Base):
         nullable=False, server_default=func.now()
     )
 
-    resume = relationship("Resume", back_populates="history")
+    resume: Mapped["Resume"] = relationship("Resume", back_populates="histories")
