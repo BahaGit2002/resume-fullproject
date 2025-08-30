@@ -1,0 +1,99 @@
+# ===================
+# Backend: FastAPI / Python
+# ===================
+
+# Byte-compiled / optimized / DLL files
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/**/__pycache__/
+
+# C extensions
+backend/*.so
+
+# Distribution / packaging
+backend/build/
+backend/dist/
+backend/*.egg-info/
+backend/.eggs/
+backend/*.egg
+backend/*.whl
+
+# Virtual environments
+backend/venv/
+backend/env/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+
+# PyInstaller
+backend/*.manifest
+backend/*.spec
+
+# Logs
+backend/*.log
+backend/logs/
+backend/*.out
+backend/*.err
+
+# Unit test / coverage reports
+backend/htmlcov/
+backend/.tox/
+backend/.nox/
+backend/.coverage
+backend/.coverage.*
+backend/.cache
+backend/nosetests.xml
+backend/coverage.xml
+backend/*.cover
+backend/*.py,cover
+backend/.hypothesis/
+
+# Migrations cache
+backend/**/migrations/__pycache__/
+backend/**/migrations/*.py[cod]
+
+# IDEs
+backend/.idea/
+backend/.vscode/
+
+# Database files (SQLite)
+backend/*.db
+backend/*.sqlite3
+
+# ===================
+# Frontend: Vue.js / Node
+# ===================
+
+# Node modules
+frontend/node_modules/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Production build
+frontend/dist/
+frontend/build/
+
+# dotenv
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# IDEs
+frontend/.idea/
+frontend/.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# ===================
+# Docker
+# ===================
+*.env
+docker-compose.override.yml
+docker-compose.local.yml
+
+
+.idea
