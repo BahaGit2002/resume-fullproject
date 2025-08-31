@@ -1,10 +1,7 @@
 import pytest
 from pydantic.v1 import EmailStr
-from sqlalchemy import delete
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import verify_password
-from app.models import User
 from app.repositories.user_repo import UserRepository
 from app.schemas.user import UserCreate
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from pydantic import ValidationError
 from app.schemas.resume import (
@@ -113,15 +115,17 @@ async def test_resume_history_response_schema_valid():
         "resume_id": 10,
         "version": 1,
         "content": "Version 1 content",
-        "created_at": "2023-01-01T12:00:00"
+        "created_at": datetime(2023, 1, 1, 12, 0, 0)
     }
     resume = ResumeHistoryResponse(**data)
+    dumped = resume.model_dump()
 
-    assert resume.id == 1
-    assert resume.resume_id == 10
-    assert resume.version == 1
-    assert resume.content == "Version 1 content"
-    assert resume.created_at == "2023-01-01T12:00:00"
+    assert dumped["id"] == 1
+    assert dumped["resume_id"] == 10
+    assert dumped["version"] == 1
+    assert dumped["content"] == "Version 1 content"
+    assert dumped["created_at"] == "2023-01-01 12:00:00"
+
 
 
 @pytest.mark.asyncio
@@ -144,7 +148,7 @@ async def test_resume_history_response_schema_missing_fields():
 async def test_resume_history_response_schema_invalid_types():
     """Тестирование валидации ResumeHistoryResponse с некорректными типами данных."""
     data = {
-        "id": "1",  # Should be int, not str
+        "id": "1",
         "resume_id": 10,
         "version": 1,
         "content": "Version 1 content",

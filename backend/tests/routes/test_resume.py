@@ -1,9 +1,9 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import delete, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Resume, ResumeHistory
+from app.models import Resume
 from app.models.user import User
 from app.schemas.resume import ResumeCreate
 from app.core.security import create_jwt
@@ -116,13 +116,19 @@ async def test_delete_resume(
 
 
 @pytest.mark.asyncio
-async def test_improve_resume(client: AsyncClient, async_session: AsyncSession, auth_header):
+async def test_improve_resume(
+    client: AsyncClient, async_session: AsyncSession, auth_header
+    ):
     headers, user = auth_header
     resume_in = ResumeCreate(title="To Improve", content="Initial content")
-    resume = await ResumeService.create_resume(resume_in, async_session, user.id)
+    resume = await ResumeService.create_resume(
+        resume_in, async_session, user.id
+        )
     await async_session.commit()
 
-    result = await async_session.execute(select(Resume).where(Resume.id == resume.id))
+    result = await async_session.execute(
+        select(Resume).where(Resume.id == resume.id)
+        )
     db_resume = result.unique().scalar_one_or_none()
     assert db_resume is not None, f"Resume with ID {resume.id} was not found in the database"
     assert db_resume.user_id == user.id, f"Resume user_id {db_resume.user_id} does not match user {user.id}"
@@ -135,3 +141,45 @@ async def test_improve_resume(client: AsyncClient, async_session: AsyncSession, 
     assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     body = response.json()
     assert "Improved" in body["content"]
+
+
+@pytest.mark.asyncio
+async def test_get_resume_history(
+    client: AsyncClient, async_session: AsyncSession, auth_header
+    ):
+    headers, user = auth_header
+
+    resume_in = ResumeCreate(title="History Resume", content="Initial content")
+    resume = await ResumeService.create_resume(
+        resume_in, async_session, user.id
+        )
+    await async_session.commit()
+
+    response = await client.get(
+        f"/resumes/{resume.id}/history", headers=headers
+        )
+    assert response.status_code == 200
+    body = response.json()
+    assert isinstance(body, list)
+    assert len(body) == 0
+
+    for i in range(2):
+        await client.post(
+            f"/resumes/{resume.id}/improve",
+            json={"content": f"Improved content {i + 1}"},
+            headers=headers
+        )
+    await async_session.commit()
+
+    response = await client.get(
+        f"/resumes/{resume.id}/history", headers=headers
+        )
+    assert response.status_code == 200
+    body = response.json()
+    assert isinstance(body, list)
+    assert len(body) == 2
+    assert all("Improved" in h["content"] for h in body)
+
+    response = await client.get("/resumes/999/history", headers=headers)
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Resume not found"

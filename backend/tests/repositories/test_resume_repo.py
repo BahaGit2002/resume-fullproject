@@ -1,8 +1,5 @@
 import pytest
-from sqlalchemy import delete
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import ResumeHistory, Resume
 from app.repositories.resume_repo import (
     ResumeRepository,
     ResumeHistoryRepository,

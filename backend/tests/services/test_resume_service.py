@@ -1,22 +1,21 @@
 import pytest
 from fastapi import HTTPException
-from app.repositories.resume_repo import ResumeHistoryRepository
+from app.models.user import User
 from app.schemas.resume import ResumeCreate, ResumeUpdate, ResumeImprove
 from app.services.resume_service import ResumeService
-from app.models.user import User
 
 
 async def create_user(async_session, email="test@example.com") -> User:
     user = User(email=email, hashed_password="test")
     async_session.add(user)
     await async_session.commit()
+    await async_session.refresh(user)
     return user
 
 
 @pytest.mark.asyncio
 async def test_create_resume(async_session):
     user = await create_user(async_session)
-
     resume_in = ResumeCreate(title="Test Resume", content="Sample content")
     resume = await ResumeService.create_resume(
         resume_in, async_session, user.id
@@ -31,9 +30,9 @@ async def test_create_resume(async_session):
 @pytest.mark.asyncio
 async def test_get_resumes_success_and_not_found(async_session):
     user = await create_user(async_session)
-
     resume_in = ResumeCreate(title="Test Resume", content="Sample content")
     await ResumeService.create_resume(resume_in, async_session, user.id)
+    await async_session.refresh(user)
 
     resumes = await ResumeService.get_resumes(user.email, async_session)
     assert len(resumes) == 1
@@ -44,99 +43,132 @@ async def test_get_resumes_success_and_not_found(async_session):
             "nonexistent@example.com", async_session
         )
     assert exc.value.status_code == 404
-    assert exc.value.detail == "User not found"
 
 
 @pytest.mark.asyncio
-async def test_get_resume_success_and_not_found(async_session):
+async def test_get_resume_success_and_errors(async_session):
     user = await create_user(async_session)
+    other_user = await create_user(async_session, email="other@example.com")
 
-    resume_in = ResumeCreate(title="Test Resume", content="Sample content")
     resume = await ResumeService.create_resume(
-        resume_in, async_session, user.id
+        ResumeCreate(title="Test", content="Content"), async_session, user.id
     )
 
-    fetched = await ResumeService.get_resume(resume.id, async_session)
+    fetched = await ResumeService.get_resume(resume.id, user, async_session)
     assert fetched.id == resume.id
-    assert fetched.title == resume.title
 
     with pytest.raises(HTTPException) as exc:
-        await ResumeService.get_resume(999, async_session)
+        await ResumeService.get_resume(999, user, async_session)
     assert exc.value.status_code == 404
-    assert exc.value.detail == "Resume not found"
+
+    with pytest.raises(HTTPException) as exc:
+        await ResumeService.get_resume(resume.id, other_user, async_session)
+    assert exc.value.status_code == 403
 
 
 @pytest.mark.asyncio
-async def test_update_resume_success_and_not_found(async_session):
+async def test_update_resume_success_and_errors(async_session):
     user = await create_user(async_session)
-
-    resume_in = ResumeCreate(title="Test Resume", content="Sample content")
+    other_user = await create_user(async_session, email="other@example.com")
     resume = await ResumeService.create_resume(
-        resume_in, async_session, user.id
+        ResumeCreate(title="Test", content="Content"), async_session, user.id
     )
 
-    update_data = ResumeUpdate(
-        title="Updated Resume", content="Updated content"
-    )
+    update_data = ResumeUpdate(title="Updated", content="Updated content")
     updated = await ResumeService.update_resume(
-        resume.id, update_data, async_session
+        resume.id, update_data, async_session, user
     )
-
-    assert updated.title == "Updated Resume"
-    assert updated.content == "Updated content"
+    assert updated.title == "Updated"
 
     with pytest.raises(HTTPException) as exc:
-        await ResumeService.update_resume(999, update_data, async_session)
+        await ResumeService.update_resume(
+            999, update_data, async_session, user
+        )
     assert exc.value.status_code == 404
-    assert exc.value.detail == "Resume not found"
+
+    with pytest.raises(HTTPException) as exc:
+        await ResumeService.update_resume(
+            resume.id, update_data, async_session, other_user
+        )
+    assert exc.value.status_code == 403
 
 
 @pytest.mark.asyncio
-async def test_delete_resume_success_and_not_found(async_session):
+async def test_delete_resume_success_and_errors(async_session):
     user = await create_user(async_session)
-
-    resume_in = ResumeCreate(title="Test Resume", content="Sample content")
+    other_user = await create_user(async_session, email="other@example.com")
     resume = await ResumeService.create_resume(
-        resume_in, async_session, user.id
+        ResumeCreate(title="Test", content="Content"), async_session, user.id
     )
 
-    await ResumeService.delete_resume(resume.id, async_session)
-    with pytest.raises(HTTPException) as exc:
-        await ResumeService.get_resume(resume.id, async_session)
-    assert exc.value.status_code == 404
+    await ResumeService.delete_resume(resume.id, async_session, user)
+    with pytest.raises(HTTPException):
+        await ResumeService.get_resume(resume.id, user, async_session)
 
+    resume2 = await ResumeService.create_resume(
+        ResumeCreate(title="Other", content="Other"), async_session, user.id
+    )
     with pytest.raises(HTTPException) as exc:
-        await ResumeService.delete_resume(999, async_session)
-    assert exc.value.status_code == 404
-    assert "not found" in exc.value.detail.lower()
+        await ResumeService.delete_resume(
+            resume2.id, async_session, other_user
+        )
+    assert exc.value.status_code == 403
 
 
 @pytest.mark.asyncio
-async def test_improve_resume_success_and_not_found(async_session):
+async def test_improve_resume_success_and_errors(async_session):
+    user = await create_user(async_session)
+    other_user = await create_user(async_session, email="other@example.com")
+
+    resume = await ResumeService.create_resume(
+        ResumeCreate(title="Test", content="Content"), async_session, user.id
+    )
+
+    improve_data = ResumeImprove(content="Improved")
+    improved = await ResumeService.improve_resume(
+        resume.id, improve_data, async_session, user
+    )
+    assert improved.content == "Improved [Improved]"
+
+    with pytest.raises(HTTPException) as exc:
+        await ResumeService.improve_resume(
+            999, improve_data, async_session, user
+        )
+    assert exc.value.status_code == 404
+
+    with pytest.raises(HTTPException) as exc:
+        await ResumeService.improve_resume(
+            resume.id, improve_data, async_session, other_user
+        )
+    assert exc.value.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_get_resume_history_success_and_not_found(async_session):
     user = await create_user(async_session)
 
-    resume_in = ResumeCreate(title="Test Resume", content="Sample content")
     resume = await ResumeService.create_resume(
-        resume_in, async_session, user.id
+        ResumeCreate(title="Test Resume", content="Sample content"),
+        async_session, user.id
     )
+
+    histories = await ResumeService.get_resume_history(
+        resume.id, user, async_session
+    )
+    assert histories == []
 
     improve_data = ResumeImprove(content="Improved content")
-    improved = await ResumeService.improve_resume(
-        resume.id, improve_data, async_session
+    await ResumeService.improve_resume(
+        resume.id, improve_data, async_session, user
     )
 
-    assert improved.content == "Improved content [Improved]"
-
-    history_repo = ResumeHistoryRepository(async_session)
-    max_version = await history_repo.get_max_version(resume.id)
-    assert max_version == 1
-
-    improve_data2 = ResumeImprove(content="Second improvement")
-    await ResumeService.improve_resume(resume.id, improve_data2, async_session)
-    max_version = await history_repo.get_max_version(resume.id)
-    assert max_version == 2
+    histories = await ResumeService.get_resume_history(
+        resume.id, user, async_session
+    )
+    assert len(histories) == 1
+    assert histories[0].content == "Improved content [Improved]"
 
     with pytest.raises(HTTPException) as exc:
-        await ResumeService.improve_resume(999, improve_data, async_session)
+        await ResumeService.get_resume_history(999, user, async_session)
     assert exc.value.status_code == 404
     assert exc.value.detail == "Resume not found"

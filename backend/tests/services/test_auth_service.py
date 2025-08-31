@@ -1,10 +1,7 @@
 import pytest
 from fastapi import HTTPException
 from pydantic.v1 import EmailStr
-from sqlalchemy import delete
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User
 from app.schemas.user import UserCreate, UserLogin
 from app.services.auth_service import AuthService
 
