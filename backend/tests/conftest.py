@@ -1,10 +1,12 @@
 import pytest
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import (
     create_async_engine, AsyncSession,
     async_sessionmaker,
 )
 from app.main import app
 from app.database import get_db
+from app.models import Resume, ResumeHistory, User
 from app.models.base import Base
 from httpx import AsyncClient, ASGITransport
 
@@ -44,3 +46,13 @@ async def client(async_session):
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function", autouse=True)
+async def clean_database(async_session: AsyncSession):
+    """Фикстура для очистки базы данных перед каждым тестом."""
+    await async_session.execute(delete(Resume))
+    await async_session.execute(delete(ResumeHistory))
+    await async_session.execute(delete(User))
+    await async_session.commit()
+    yield

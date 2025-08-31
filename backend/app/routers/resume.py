@@ -66,7 +66,7 @@ async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post(
-    "{resume_id}/improve", response_model=ResumeImprove, status_code=200,
+    "/{resume_id}/improve", response_model=ResumeImprove, status_code=200,
     dependencies=[Depends(swagger_auth), Depends(get_current_user)]
 )
 async def improve_resume(

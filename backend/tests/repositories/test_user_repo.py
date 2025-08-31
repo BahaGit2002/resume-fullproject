@@ -9,13 +9,6 @@ from app.repositories.user_repo import UserRepository
 from app.schemas.user import UserCreate
 
 
-@pytest.fixture(autouse=True)
-async def clean_database(async_session: AsyncSession):
-    await async_session.execute(delete(User))
-    await async_session.commit()
-    yield
-
-
 @pytest.mark.asyncio
 async def test_user_repository_create(async_session):
     user_in = UserCreate(

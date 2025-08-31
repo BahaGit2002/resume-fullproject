@@ -1,8 +1,6 @@
 from fastapi import HTTPException, status
-from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import ResumeHistory
 from app.repositories.resume_repo import (
     ResumeRepository,
     ResumeHistoryRepository,
@@ -24,9 +22,9 @@ class ResumeService:
 
     @staticmethod
     async def get_resumes(
-        email: EmailStr, db: AsyncSession
+        email: str, db: AsyncSession
     ) -> list[ResumeResponse]:
-        user = await UserRepository(db).get_by_email(str(email))
+        user = await UserRepository(db).get_by_email(email)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"

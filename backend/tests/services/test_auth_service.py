@@ -9,13 +9,6 @@ from app.schemas.user import UserCreate, UserLogin
 from app.services.auth_service import AuthService
 
 
-@pytest.fixture(autouse=True)
-async def clean_database(async_session: AsyncSession):
-    await async_session.execute(delete(User))
-    await async_session.commit()
-    yield
-
-
 @pytest.mark.asyncio
 async def test_auth_service_register_success(async_session):
     user_in = UserCreate(

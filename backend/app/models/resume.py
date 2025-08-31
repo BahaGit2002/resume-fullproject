@@ -37,4 +37,6 @@ class ResumeHistory(Base):
         nullable=False, server_default=func.now()
     )
 
-    resume: Mapped["Resume"] = relationship("Resume", back_populates="histories")
+    resume: Mapped["Resume"] = relationship(
+        "Resume", back_populates="histories"
+    )

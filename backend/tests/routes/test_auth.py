@@ -15,7 +15,7 @@ async def test_register_endpoint_success(client):
 @pytest.mark.asyncio
 async def test_register_endpoint_user_exists(client):
     user_data = {"email": "test@example.com", "password": "testpassword"}
-    await client.post("/register", json=user_data)
+    await client.post("auth/register", json=user_data)
 
     response = await client.post("auth/register", json=user_data)
 
@@ -26,7 +26,7 @@ async def test_register_endpoint_user_exists(client):
 @pytest.mark.asyncio
 async def test_login_endpoint_success(client):
     user_data = {"email": "test@example.com", "password": "testpassword"}
-    await client.post("/register", json=user_data)
+    await client.post("auth/register", json=user_data)
 
     response = await client.post("auth/login", json=user_data)
 
