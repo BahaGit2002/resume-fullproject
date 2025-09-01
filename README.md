@@ -136,14 +136,14 @@ serve -s dist -l 8080
 
 ```env
 # Database
-DATABASE_URL=postgresql+asyncpg://root:password@localhost:5432/resume_db
+DATABASE_URL=postgresql+asyncpg://root:a!~A1H04;N"I@db:5432/resume_db
 
 # JWT
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=3WeFu6qHXb9Cqb2ofQAK3ZNHCqCVmlyH
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-BACKEND_CORS_ORIGINS='["http://127.0.0.1:5173", "http://localhost:5173", "http://localhost:8080", "http://127.0.0.1:8080"]'
+BACKEND_CORS_ORIGINS='["http://localhost:8080", "http://127.0.0.1:8080"]'
 ```
 
 > ⚠️ **Важно**: Никогда не коммитьте `.env` файлы в репозиторий!
