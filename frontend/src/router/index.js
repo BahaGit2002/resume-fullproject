@@ -1,22 +1,12 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import AuthView from "@/views/AuthView.vue";
 import ResumesView from "@/views/ResumesView.vue";
 
-
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHashHistory(import.meta.env.BASE_URL),
     routes: [
-        {
-            path: '/',
-            name: 'auth',
-            component: AuthView
-        },
-        {
-            path: '/resumes',
-            name: 'resumes',
-            component: ResumesView,
-            meta: { requiresAuth: true }
-        }
+        { path: '/', name: 'auth', component: AuthView },
+        { path: '/resumes', name: 'resumes', component: ResumesView, meta: { requiresAuth: true } }
     ]
 })
 
