@@ -93,7 +93,7 @@ const showViewModal = ref(false)
 const error = ref('')
 const history = ref([])
 
-const BASE_URL = 'https://resume-fullproject.onrender.com/'
+const BASE_URL = 'https://resume-fullproject.onrender.com'
 const token = localStorage.getItem('jwt')
 
 const fetchResumes = async () => {

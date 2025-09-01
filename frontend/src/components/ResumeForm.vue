@@ -62,7 +62,7 @@ watch(() => props.resume, (newResume) => {
   }
 }, {immediate: true})
 
-const BASE_URL = 'http://localhost:8000'
+const BASE_URL = 'https://resume-fullproject.onrender.com'
 const token = localStorage.getItem('jwt')
 
 const saveResume = async () => {
