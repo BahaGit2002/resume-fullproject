@@ -11,10 +11,10 @@
     </div>
 
     <!-- Модальное окно для добавления резюме -->
-    <ResumeForm v-if="showAddForm" @close="showAddForm = false" @saved="fetchResumes" />
+    <ResumeForm v-if="showAddForm" @close="showAddForm = false" @saved="fetchResumes"/>
 
     <!-- Модальное окно для редактирования резюме -->
-    <ResumeForm v-if="showEditForm" :resume="selectedResume" @close="showEditForm = false" @saved="handleEditSaved" />
+    <ResumeForm v-if="showEditForm" :resume="selectedResume" @close="showEditForm = false" @saved="handleEditSaved"/>
 
     <!-- Модальное окно для просмотра резюме -->
     <div v-if="showViewModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
@@ -25,7 +25,9 @@
             <button type="button" class="btn-close" @click="closeView"></button>
           </div>
           <div class="modal-body">
-            <p class="mb-4" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">{{ displayedContent }}</p>
+            <p class="mb-4" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">{{
+                displayedContent
+              }}</p>
             <div class="d-flex gap-2 mb-3">
               <button @click="improveResume" class="btn btn-primary">
                 <i class="bi bi-stars me-2"></i>Улучшить
@@ -69,7 +71,8 @@
     </div>
 
     <ul class="list-group">
-      <li v-for="resume in resumes" :key="resume.id" class="list-group-item d-flex justify-content-between align-items-center">
+      <li v-for="resume in resumes" :key="resume.id"
+          class="list-group-item d-flex justify-content-between align-items-center">
         <span><i class="bi bi-file-earmark-text me-2"></i>{{ resume.title }}</span>
         <button @click="viewResume(resume)" class="btn btn-primary btn-sm">
           <i class="bi bi-eye me-2"></i>Просмотреть
@@ -80,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {ref, onMounted} from 'vue'
 import axios from 'axios'
 import ResumeForm from '../components/ResumeForm.vue'
 
@@ -98,7 +101,7 @@ const token = localStorage.getItem('jwt')
 
 const fetchResumes = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/resumes`, { headers: { Authorization: `Bearer ${token}` } })
+    const response = await axios.get(`${BASE_URL}/resumes`, {headers: {Authorization: `Bearer ${token}`}})
     resumes.value = response.data
     error.value = ''
   } catch (error) {
@@ -108,7 +111,7 @@ const fetchResumes = async () => {
 
 const viewResume = async (resume) => {
   try {
-    const response = await axios.get(`${BASE_URL}/resumes/${resume.id}`, { headers: { Authorization: `Bearer ${token}` } })
+    const response = await axios.get(`${BASE_URL}/resumes/${resume.id}`, {headers: {Authorization: `Bearer ${token}`}})
     selectedResume.value = response.data
     displayedContent.value = response.data.content
     await fetchHistory(resume.id)
@@ -121,7 +124,7 @@ const viewResume = async (resume) => {
 
 const fetchHistory = async (resumeId) => {
   try {
-    const response = await axios.get(`${BASE_URL}/resumes/${resumeId}/history`, { headers: { Authorization: `Bearer ${token}` } })
+    const response = await axios.get(`${BASE_URL}/resumes/${resumeId}/history`, {headers: {Authorization: `Bearer ${token}`}})
     history.value = response.data
     error.value = ''
   } catch (error) {
@@ -138,8 +141,8 @@ const improveResume = async () => {
     }
     const response = await axios.post(
         `${BASE_URL}/resumes/${selectedResume.value.id}/improve`,
-        { content: selectedResume.value.content },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {content: selectedResume.value.content},
+        {headers: {Authorization: `Bearer ${token}`}}
     )
     displayedContent.value = response.data.improved_content
     selectedResume.value.content = response.data.improved_content
@@ -151,22 +154,22 @@ const improveResume = async () => {
 }
 
 const editResume = () => {
-  showViewModal.value = false // Закрываем модальное окно просмотра
-  showEditForm.value = true // Открываем модальное окно редактирования
+  showViewModal.value = false
+  showEditForm.value = true
 }
 
 const handleEditSaved = async () => {
   await fetchResumes()
   if (selectedResume.value) {
-    await viewResume({ id: selectedResume.value.id })
+    await viewResume({id: selectedResume.value.id})
   }
 }
 
 const deleteResume = async () => {
   if (confirm('Вы уверены, что хотите удалить резюме?')) {
     try {
-      await axios.delete(`${BASE_URL}/resumes/${selectedResume.value.id}`, { headers: { Authorization: `Bearer ${token}` } })
-      showViewModal.value = false // Закрываем модальное окно просмотра
+      await axios.delete(`${BASE_URL}/resumes/${selectedResume.value.id}`, {headers: {Authorization: `Bearer ${token}`}})
+      showViewModal.value = false
       selectedResume.value = null
       history.value = []
       fetchResumes()
