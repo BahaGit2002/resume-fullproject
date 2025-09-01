@@ -93,7 +93,7 @@ const showViewModal = ref(false)
 const error = ref('')
 const history = ref([])
 
-const BASE_URL = 'http://localhost:8000'
+const BASE_URL = 'https://resume-fullproject.onrender.com/'
 const token = localStorage.getItem('jwt')
 
 const fetchResumes = async () => {
@@ -151,8 +151,8 @@ const improveResume = async () => {
 }
 
 const editResume = () => {
-  showViewModal.value = false // Закрываем модальное окно просмотра
-  showEditForm.value = true // Открываем модальное окно редактирования
+  showViewModal.value = false
+  showEditForm.value = true
 }
 
 const handleEditSaved = async () => {
@@ -166,7 +166,7 @@ const deleteResume = async () => {
   if (confirm('Вы уверены, что хотите удалить резюме?')) {
     try {
       await axios.delete(`${BASE_URL}/resumes/${selectedResume.value.id}`, { headers: { Authorization: `Bearer ${token}` } })
-      showViewModal.value = false // Закрываем модальное окно просмотра
+      showViewModal.value = false
       selectedResume.value = null
       history.value = []
       fetchResumes()

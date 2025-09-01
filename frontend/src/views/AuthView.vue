@@ -40,7 +40,7 @@ const password = ref('')
 const error = ref('')
 const router = useRouter()
 
-const BASE_URL = 'http://localhost:8000/auth'
+const BASE_URL = 'https://resume-fullproject.onrender.com/auth'
 
 const toggleMode = () => {
   isLogin.value = !isLogin.value
